@@ -32,19 +32,36 @@ app.post('/api/new-playpen', function(req,res) {
 
 	pool.connect((err,client,done)=>{
 		if(err){
-			console.log('first',err)
 			return res.status(400).send(err);
 		} else {
 			client.query('INSERT INTO playpens (name) VALUES ($1)',[playpen_name],(err,table)=>{
 				if(err){
-					console.log('second', err)
 					return res.status(400).send(err);
 				} else {
-					console.log(table);
+					res.status(200).send({ message: 'Playpen Initialized' });
 				}
 			});
 		}
 
+	});
+})
+
+app.get('/api/playpen/:name', function(req, res) {
+	var name = req.params.name;
+
+	pool.connect(function(err, client, done) {
+		if(err) {
+			return res.status(400).send(err);
+		} else {
+			client.query('SELECT FROM playpens WHERE name = $1', [name], function(err, table) {
+				done();
+				if (err) {
+					return res.status(400).send(err);
+				} else {
+					res.status(200).send(table.rows);
+				}
+			})
+		}
 	});
 })
 
